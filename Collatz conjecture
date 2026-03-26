@@ -1,0 +1,198 @@
+def inct(n, depth):
+    """
+    Generates an inverse Collatz tree starting from n.
+    Returns a dictionary where keys are numbers and values are their parents.
+    """
+    tree = {n: []}
+    current_level = [n]
+
+    for _ in range(depth):
+        next_level = []
+        for num in current_level:
+            # Rule 1: Every number comes from (num * 2)
+            branches = [num * 2]
+            
+            # Rule 2: If (num - 1) is divisible by 3 and result is odd and > 1
+            if (num - 1) % 3 == 0:
+                prev_odd = (num - 1) // 3
+                if prev_odd > 1 and prev_odd % 2 != 0:
+                    branches.append(prev_odd)
+            
+            tree[num] = branches
+            next_level.extend(branches)
+        current_level = next_level
+        
+    return tree
+def seq(n):
+    """Returns the standard Collatz sequence for n until it hits 1."""
+    result = [n]
+    while n > 1:
+        if n % 2 == 0:
+            n //= 2
+        else:
+            n = 3 * n + 1
+        result.append(n)
+    return result
+def mcn(n):
+    """Counts total multiplications (3n + 1) in the Collatz sequence."""
+    count = 0
+    while n > 1:
+        if n % 2 != 0:
+            n = 3 * n + 1
+            count += 1
+        else:
+            n //= 2
+    return count
+
+def dcn(n):
+    """Counts total divisions (// 2) in the Collatz sequence."""
+    count = 0
+    while n > 1:
+        if n % 2 == 0:
+            n //= 2
+            count += 1
+        else:
+            n = 3 * n + 1
+    return count
+def node_count(n, depth):
+    """Counts the total unique numbers in an inverse Collatz tree of a certain depth."""
+    unique_nodes = {n}
+    current_level = [n]
+
+    for _ in range(depth):
+        next_level = []
+        for num in current_level:
+            # Rule 1: Always add (num * 2)
+            b1 = num * 2
+            unique_nodes.add(b1)
+            next_level.append(b1)
+            
+            # Rule 2: Add (num - 1) // 3 if it fits Collatz rules
+            if (num - 1) % 3 == 0:
+                b2 = (num - 1) // 3
+                if b2 > 1 and b2 % 2 != 0:
+                    unique_nodes.add(b2)
+                    next_level.append(b2)
+        current_level = next_level
+        
+    return len(unique_nodes)
+def cnc(depth):
+    """
+    Calculates the total sum of all unique numbers 
+    found in the inverse Collatz tree starting from 1.
+    """
+    unique_nodes = {1}
+    current_level = {1}
+
+    for _ in range(depth):
+        next_level = set()
+        for num in current_level:
+            # Rule 1: Always multiply by 2
+            b1 = num * 2
+            unique_nodes.add(b1)
+            next_level.add(b1)
+            
+            # Rule 2: (num - 1) / 3 if result is odd and > 1
+            if (num - 1) % 3 == 0:
+                b2 = (num - 1) // 3
+                if b2 > 1 and b2 % 2 != 0:
+                    unique_nodes.add(b2)
+                    next_level.add(b2)
+        current_level = next_level
+        
+    return len(unique_nodes)
+def mpcn(n):
+    """Returns the highest value reached in the Collatz sequence for n."""
+    peak = n
+    while n > 1:
+        if n % 2 == 0:
+            n //= 2
+        else:
+            n = 3 * n + 1
+        
+        # Check if the current number is the new highest
+        if n > peak:
+            peak = n
+            
+    return peak
+def scn(n):
+    """Returns the total number of steps in the Collatz sequence for n."""
+    steps = 0
+    while n > 1:
+        if n % 2 == 0:
+            n //= 2
+        else:
+            n = 3 * n + 1
+        steps += 1
+    return steps
+def pkr(n):
+    """
+    Peak-to-Start Ratio (pkr).
+    Shows how many times larger the peak is compared to the starting number.
+    """
+    return mpcn(n) / n
+
+def oer(n):
+    """
+    Odd-Even Ratio (oer).
+    Returns the percentage of the sequence that consists of odd numbers.
+    """
+    s = seq(n)
+    odds = [x for x in s if x % 2 != 0]
+    return (len(odds) / len(s)) * 100
+
+def parity(n):
+    """
+    Returns a string of 'E' and 'O' representing the 
+    Even/Odd sequence (Parity Path).
+    """
+    path = ""
+    while n > 1:
+        if n % 2 == 0:
+            path += "E"
+            n //= 2
+        else:
+            path += "O"
+            n = 3 * n + 1
+    return path
+def avg(n):
+    """Returns the average value of all numbers in the sequence of n."""
+    s = seq(n)
+    return sum(s) / len(s)
+def ssc(limit):
+    """
+    Sequence Self-Count: Finds numbers where 
+    Number == Sequence Length.
+    """
+    matches = []
+    for i in range(1, limit + 1):
+        if scn(i) == i:
+            matches.append(i)
+    return matches
+
+def lpc(limit):
+    """
+    Length-Pair-Check: Finds numbers where
+    Sequence Length == Reverse of the Number's digits.
+    Example: If i=12 and length is 21.
+    """
+    matches = []
+    for i in range(1, limit + 1):
+        rev_i = int(str(i)[::-1]) # Reverse the number digits
+        if scn(i) == rev_i:
+            matches.append(i)
+    return matches
+
+def onc(limit):
+    """
+    Opposite Number Count: Finds numbers where
+    Number == Reverse of the Sequence Length's digits.
+    Example: If length is 21 and number is 12.
+    """
+    matches = []
+    for i in range(1, limit + 1):
+        length = scn(i)
+        rev_len = int(str(length)[::-1]) # Reverse the length digits
+        if rev_len == i:
+            matches.append(i)
+    return matches

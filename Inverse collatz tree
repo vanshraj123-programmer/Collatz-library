@@ -1,0 +1,89 @@
+def find_ancestors_up_to_steps(max_steps_from_one):
+    """
+    Generates all unique ancestors (numbers X) whose Collatz path
+    reaches 1 in exactly N steps, for 1 <= N <= max_steps_from_one.
+
+    Args:
+        max_steps_from_one (int): The maximum number of steps (path length) to check.
+
+    Returns:
+        dict: A dictionary where keys are the number of steps (N) and values
+              are a set of all unique ancestors X such that T(X) = N.
+    """
+    
+    # i have use a dictionary to store the unique ancestors found for each step count.
+    ancestors_by_step = {}
+    
+    # Initialize with the final step (0 steps means the number 1 itself, 
+    # but Collatz sequences end after 1, so we start the path length at 1)
+    
+    # Ancestors is the set of numbers we found at the *previous* step count.
+    # We start with {2} because T(2) = 1 (2 -> 1)
+    current_generation = {2} 
+    ancestors_by_step[1] = current_generation.copy() 
+    
+    # I used a set to keep track of all numbers already found to ensure uniqueness
+    # and avoid counting the same number multiple times if it has two different paths.
+    all_found_ancestors = {1, 2} 
+
+    # Iterate through the desired number of steps
+    for steps in range(2, max_steps_from_one + 1):
+        
+        # It calculate the next generation of ancestors
+        next_generation = set()
+        
+        for n in current_generation:
+            
+            # Predecessor Rule 1: Division (Always possible, deterministic)
+            # The predecessor is 2*n. (From m/2 = n)
+            pred_div = 2 * n
+            
+            if pred_div not in all_found_ancestors:
+                next_generation.add(pred_div)
+                all_found_ancestors.add(pred_div)
+            
+            # Predecessor Rule 2: 3n+1 (Only possible if n = (3m+1) for some odd m) 
+            # A number m is a predecessor if 3m + 1 = n.
+            # This requires (n - 1) to be divisible by 3, and m must be odd.
+            # If n is a number where (n-1) is divisible by 3, we test it.
+            if (n - 1) % 3 == 0:
+                pred_mult = (n - 1) // 3
+                
+                # The predecessor must be an odd number (otherwise it would have come
+                # from 2*pred_mult via the division rule).
+                if pred_mult % 2 != 0:
+                    if pred_mult not in all_found_ancestors:
+                        next_generation.add(pred_mult)
+                        all_found_ancestors.add(pred_mult)
+
+        if next_generation:
+            ancestors_by_step[steps] = next_generation
+            current_generation = next_generation
+        else:
+            # It should not happen based on Collatz properties
+            break
+
+    return ancestors_by_step
+
+#  Run the function to confirm collatz sequences
+
+# Find all unique ancestors up to 10 steps from 1
+ancestor_map = find_ancestors_up_to_steps(41)
+
+print("--- Collatz Ancestry Count: Steps from 1 ---")
+print("Steps (N) | Count of Ancestors (A_N) | Specific Ancestors ")
+print("-" * 75)
+
+# The user's sequence is based on the TOTAL stopping time T(X) = N.
+# I map the results to the user's N-th last term steps (T(X)+1)
+for steps, ancestors in ancestor_map.items():
+    
+    # Sort for consistent display
+    sorted_ancestors = sorted(list(ancestors))
+    
+    # Calculate the count A_N
+    count = len(sorted_ancestors)
+
+    # Print the result in a readable format
+    print(f"{steps:<10}| {count:<23}| {sorted_ancestors}")
+
